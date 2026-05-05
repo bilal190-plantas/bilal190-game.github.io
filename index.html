@@ -1,14 +1,90 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-  <title>Mi primera web</title>
+  <meta charset="UTF-8">
+  <title>Control Panel</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .panel {
+      background: rgba(255,255,255,0.05);
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      text-align: center;
+      width: 300px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      font-size: 22px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .on {
+      background: #22c55e;
+      color: white;
+    }
+
+    .off {
+      background: #ef4444;
+      color: white;
+    }
+
+    .status {
+      margin-top: 15px;
+      font-size: 14px;
+      opacity: 0.8;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+    }
+  </style>
 </head>
+
 <body>
 
-  <h1>Mi primera web</h1>
+  <div class="panel">
+    <h1>⚡ Control Panel</h1>
 
-  <button onclick="alert('Botón 1 pulsado')">Botón 1</button>
-  <button onclick="alert('Botón 2 pulsado')">Botón 2</button>
+    <button class="on" onclick="encender()">Encender</button>
+    <button class="off" onclick="apagar()">Apagar</button>
+
+    <div class="status" id="estado">Estado: desconocido</div>
+  </div>
+
+  <script>
+    function encender() {
+      document.getElementById("estado").innerText = "Estado: ENCENDIDO";
+      console.log("Encender");
+    }
+
+    function apagar() {
+      document.getElementById("estado").innerText = "Estado: APAGADO";
+      console.log("Apagar");
+    }
+  </script>
 
 </body>
 </html>
