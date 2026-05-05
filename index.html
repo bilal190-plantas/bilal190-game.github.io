@@ -245,45 +245,123 @@ function game3(){
 function game4(){
 
   let rocket = {x:200,y:500,vy:0};
-  let moonY = 100;
-  let gravity = 0.05;
   let fuel = 100;
+
+  let obstacles = [];
+  let meteors = [];
+  let distance = 0;
+  let speed = 1;
+
+  let moonY = -5000; // muy arriba → viaje largo
+
+  function spawn(){
+    if(Math.random()<0.08){
+      obstacles.push({
+        x:Math.random()*c.width,
+        y:-50,
+        w:40,
+        h:40
+      });
+    }
+
+    if(Math.random()<0.1){
+      meteors.push({
+        x:Math.random()*c.width,
+        y:-50,
+        vy:3+Math.random()*3
+      });
+    }
+  }
 
   function loop(){
 
     ctx.fillStyle="#000";
     ctx.fillRect(0,0,c.width,c.height);
 
-    // luna
-    ctx.fillStyle="white";
-    ctx.beginPath();
-    ctx.arc(c.width/2,moonY,40,0,Math.PI*2);
-    ctx.fill();
+    spawn();
 
-    // cohete
+    // movimiento WASD
     if(keys["w"] && fuel>0){
-      rocket.vy -= 0.2;
-      fuel -= 0.3;
+      rocket.vy -= 0.3;
+      fuel -= 0.2;
     }
+    if(keys["a"]) rocket.x -= 5;
+    if(keys["d"]) rocket.x += 5;
 
-    rocket.vy += gravity;
+    rocket.vy += 0.05;
     rocket.y += rocket.vy;
 
+    // scroll del mundo (simula subida)
+    distance += speed;
+
+    // ROCKET
     ctx.fillStyle="orange";
     ctx.fillRect(rocket.x,rocket.y,20,40);
 
+    // OBSTÁCULOS
+    ctx.fillStyle="red";
+    for(let i=0;i<obstacles.length;i++){
+      obstacles[i].y += speed+2;
+
+      ctx.fillRect(
+        obstacles[i].x,
+        obstacles[i].y,
+        obstacles[i].w,
+        obstacles[i].h
+      );
+
+      // colisión
+      if(
+        rocket.x < obstacles[i].x + 40 &&
+        rocket.x + 20 > obstacles[i].x &&
+        rocket.y < obstacles[i].y + 40 &&
+        rocket.y + 40 > obstacles[i].y
+      ){
+        mostrarGameOver("💥 Chocaste con un obstáculo");
+        return;
+      }
+    }
+
+    // METEORITOS
+    ctx.fillStyle="white";
+    for(let i=0;i<meteors.length;i++){
+      meteors[i].y += meteors[i].vy;
+
+      ctx.beginPath();
+      ctx.arc(meteors[i].x, meteors[i].y, 8, 0, Math.PI*2);
+      ctx.fill();
+
+      if(
+        rocket.x < meteors[i].x + 10 &&
+        rocket.x + 20 > meteors[i].x &&
+        rocket.y < meteors[i].y + 10 &&
+        rocket.y + 40 > meteors[i].y
+      ){
+        mostrarGameOver("☄️ Impacto de meteorito");
+        return;
+      }
+    }
+
+    // LUNA (meta)
+    ctx.fillStyle="white";
+    ctx.beginPath();
+    ctx.arc(c.width/2, moonY + distance, 60, 0, Math.PI*2);
+    ctx.fill();
+
     // HUD
     ctx.fillStyle="white";
-    ctx.fillText("Fuel: "+fuel.toFixed(0),10,20);
+    ctx.fillText("Combustible: " + fuel.toFixed(0),10,20);
+    ctx.fillText("Distancia: " + distance.toFixed(0),10,40);
 
-    // victoria
-    if(rocket.y < moonY+40){
-      alert("🚀 ¡HAS LLEGADO A LA LUNA!");
-      location.reload();
+    // victoria tras ~3 min simulados
+    if(distance > 5000){
+      mostrarGameOver("🌙 ¡HAS LLEGADO A LA LUNA!");
+      return;
     }
 
     requestAnimationFrame(loop);
   }
+
   loop();
 }
 
