@@ -2,77 +2,64 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Game Hub 3D</title>
+<title>Arcade Hub</title>
 
 <style>
 body {
   margin: 0;
   font-family: system-ui;
-  background: radial-gradient(circle at top, #0f172a, #020617);
+  background: #0f172a;
   color: white;
   overflow: hidden;
 }
 
-/* MENU PRINCIPAL */
-.menu {
+#menu {
   position: absolute;
   width: 100%;
   height: 100%;
+  background: linear-gradient(135deg,#0f172a,#1e293b);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(120deg, #0f172a, #1e293b);
 }
 
-h1 {
-  font-size: 26px;
-  margin-bottom: 20px;
-}
+h1 { margin-bottom: 20px; }
 
 .btn {
-  width: 220px;
+  width: 240px;
   padding: 12px;
   margin: 8px;
   border: none;
   border-radius: 12px;
   cursor: pointer;
-  font-size: 15px;
-  transition: 0.2s;
   color: white;
+  font-size: 15px;
 }
 
-.btn:hover {
-  transform: scale(1.05);
-}
+.g1 { background:#22c55e; }
+.g2 { background:#3b82f6; }
+.g3 { background:#f97316; }
+.g4 { background:#a855f7; }
 
-.g1 { background: linear-gradient(90deg,#22c55e,#16a34a); }
-.g2 { background: linear-gradient(90deg,#3b82f6,#1d4ed8); }
-.g3 { background: linear-gradient(90deg,#f97316,#ef4444); }
-
-/* JUEGO */
-.game {
-  display: none;
-  width: 100%;
-  height: 100%;
-}
+#game { display:none; }
 
 canvas {
-  width: 100%;
-  height: 100%;
-  display: block;
+  width:100vw;
+  height:100vh;
+  display:block;
 }
 
-.back {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  padding: 8px 12px;
-  border: none;
-  border-radius: 8px;
-  background: rgba(255,255,255,0.2);
-  color: white;
-  cursor: pointer;
+#back {
+  position:absolute;
+  top:10px;
+  left:10px;
+  padding:8px 12px;
+  border:none;
+  border-radius:8px;
+  background:rgba(255,255,255,0.2);
+  color:white;
+  cursor:pointer;
 }
 </style>
 </head>
@@ -80,115 +67,220 @@ canvas {
 <body>
 
 <!-- MENU -->
-<div class="menu" id="menu">
-  <h1>🎮 GAME HUB 3D</h1>
-  <button class="btn g1" onclick="startGame(1)">Juego 1 - Neon Runner</button>
-  <button class="btn g2" onclick="startGame(2)">Juego 2 - Cube Jump</button>
-  <button class="btn g3" onclick="startGame(3)">Juego 3 - Space Orbit</button>
+<div id="menu">
+  <h1>🎮 ARCADE HUB</h1>
+  <button class="btn g1" onclick="start(1)">🟢 Esquiva Enemigos (WASD)</button>
+  <button class="btn g2" onclick="start(2)">🔵 Atrapa Monedas</button>
+  <button class="btn g3" onclick="start(3)">🟠 Snake Simple</button>
+  <button class="btn g4" onclick="start(4)">🚀 Viaje a la Luna</button>
 </div>
 
-<!-- JUEGO -->
-<div class="game" id="game">
-  <button class="back" onclick="backMenu()">← Menu</button>
-  <canvas id="canvas"></canvas>
+<!-- GAME -->
+<div id="game">
+  <button id="back" onclick="location.reload()">← Menú</button>
+  <canvas id="c"></canvas>
 </div>
 
 <script>
 
-let canvas = document.getElementById("canvas");
-let ctx = canvas.getContext("2d");
+let c = document.getElementById("c");
+let ctx = c.getContext("2d");
 
 function resize(){
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  c.width = innerWidth;
+  c.height = innerHeight;
 }
 window.addEventListener("resize", resize);
 
+/* CONTROLES WASD */
+let keys = {};
+document.addEventListener("keydown", e => keys[e.key.toLowerCase()] = true);
+document.addEventListener("keyup", e => keys[e.key.toLowerCase()] = false);
+
 /* MENU */
-function startGame(n){
-  document.getElementById("menu").style.display = "none";
-  document.getElementById("game").style.display = "block";
+function start(g){
+  document.getElementById("menu").style.display="none";
+  document.getElementById("game").style.display="block";
   resize();
-  if(n===1) game1();
-  if(n===2) game2();
-  if(n===3) game3();
+
+  if(g===1) game1();
+  if(g===2) game2();
+  if(g===3) game3();
+  if(g===4) game4();
 }
 
-function backMenu(){
-  document.getElementById("menu").style.display = "flex";
-  document.getElementById("game").style.display = "none";
-}
-
-/* ===== JUEGO 1: NEON RUNNER ===== */
+/* =====================
+   JUEGO 1: ENEMIGOS WASD
+===================== */
 function game1(){
-  let x = 100;
+
+  let p = {x:200,y:200};
+  let enemies = [];
 
   function loop(){
-    ctx.fillStyle = "#0f172a";
-    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle="#0f172a";
+    ctx.fillRect(0,0,c.width,c.height);
 
-    x += 5;
-    if(x > canvas.width) x = 0;
+    // movimiento WASD
+    if(keys["w"]) p.y-=5;
+    if(keys["s"]) p.y+=5;
+    if(keys["a"]) p.x-=5;
+    if(keys["d"]) p.x+=5;
 
-    ctx.fillStyle = "#22c55e";
-    ctx.fillRect(x, canvas.height/2, 60, 60);
+    // jugador
+    ctx.fillStyle="#22c55e";
+    ctx.fillRect(p.x,p.y,20,20);
+
+    // enemigos
+    if(Math.random()<0.03){
+      enemies.push({x:Math.random()*c.width,y:0});
+    }
+
+    ctx.fillStyle="red";
+    for(let i=0;i<enemies.length;i++){
+      enemies[i].y += 4;
+      ctx.fillRect(enemies[i].x,enemies[i].y,20,20);
+
+      // colisión
+      if(Math.abs(enemies[i].x-p.x)<20 &&
+         Math.abs(enemies[i].y-p.y)<20){
+        alert("💥 GAME OVER");
+        location.reload();
+      }
+    }
 
     requestAnimationFrame(loop);
   }
   loop();
 }
 
-/* ===== JUEGO 2: CUBE JUMP ===== */
+/* =====================
+   JUEGO 2: MONEDAS
+===================== */
 function game2(){
-  let y = 200;
-  let vel = 0;
 
-  document.onkeydown = (e)=>{
-    if(e.key===" "){
-      vel = -10;
+  let p = {x:200,y:200};
+  let coins = [];
+  let score = 0;
+
+  function loop(){
+    ctx.fillStyle="#020617";
+    ctx.fillRect(0,0,c.width,c.height);
+
+    if(keys["w"]) p.y-=5;
+    if(keys["s"]) p.y+=5;
+    if(keys["a"]) p.x-=5;
+    if(keys["d"]) p.x+=5;
+
+    ctx.fillStyle="#3b82f6";
+    ctx.fillRect(p.x,p.y,20,20);
+
+    if(Math.random()<0.05){
+      coins.push({x:Math.random()*c.width,y:Math.random()*c.height});
     }
+
+    for(let i=0;i<coins.length;i++){
+      ctx.fillStyle="yellow";
+      ctx.beginPath();
+      ctx.arc(coins[i].x,coins[i].y,8,0,Math.PI*2);
+      ctx.fill();
+
+      if(Math.abs(coins[i].x-p.x)<20 &&
+         Math.abs(coins[i].y-p.y)<20){
+        coins.splice(i,1);
+        score+=10;
+      }
+    }
+
+    ctx.fillStyle="white";
+    ctx.fillText("Score: "+score,10,20);
+
+    requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+/* =====================
+   JUEGO 3: SNAKE
+===================== */
+function game3(){
+
+  let snake=[{x:100,y:100}];
+  let dir="right";
+
+  document.onkeydown = e=>{
+    if(e.key==="ArrowUp") dir="up";
+    if(e.key==="ArrowDown") dir="down";
+    if(e.key==="ArrowLeft") dir="left";
+    if(e.key==="ArrowRight") dir="right";
   };
 
   function loop(){
-    ctx.fillStyle = "#020617";
-    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle="#111";
+    ctx.fillRect(0,0,c.width,c.height);
 
-    vel += 0.5;
-    y += vel;
+    let h={...snake[0]};
 
-    if(y > canvas.height - 100){
-      y = canvas.height - 100;
-      vel = 0;
-    }
+    if(dir==="right")h.x+=10;
+    if(dir==="left")h.x-=10;
+    if(dir==="up")h.y-=10;
+    if(dir==="down")h.y+=10;
 
-    ctx.fillStyle = "#3b82f6";
-    ctx.fillRect(200, y, 50, 50);
+    snake.unshift(h);
+    snake.pop();
+
+    ctx.fillStyle="#22c55e";
+    snake.forEach(s=>{
+      ctx.fillRect(s.x,s.y,10,10);
+    });
 
     requestAnimationFrame(loop);
   }
   loop();
 }
 
-/* ===== JUEGO 3: SPACE ORBIT ===== */
-function game3(){
-  let angle = 0;
+/* =====================
+   JUEGO 4: COHETE A LA LUNA
+===================== */
+function game4(){
+
+  let rocket = {x:200,y:500,vy:0};
+  let moonY = 100;
+  let gravity = 0.05;
+  let fuel = 100;
 
   function loop(){
-    ctx.fillStyle = "#000";
-    ctx.fillRect(0,0,canvas.width,canvas.height);
 
-    let cx = canvas.width/2;
-    let cy = canvas.height/2;
+    ctx.fillStyle="#000";
+    ctx.fillRect(0,0,c.width,c.height);
 
-    let x = cx + Math.cos(angle)*150;
-    let y = cy + Math.sin(angle)*150;
-
-    angle += 0.02;
-
-    ctx.fillStyle = "#f97316";
+    // luna
+    ctx.fillStyle="white";
     ctx.beginPath();
-    ctx.arc(x,y,30,0,Math.PI*2);
+    ctx.arc(c.width/2,moonY,40,0,Math.PI*2);
     ctx.fill();
+
+    // cohete
+    if(keys["w"] && fuel>0){
+      rocket.vy -= 0.2;
+      fuel -= 0.3;
+    }
+
+    rocket.vy += gravity;
+    rocket.y += rocket.vy;
+
+    ctx.fillStyle="orange";
+    ctx.fillRect(rocket.x,rocket.y,20,40);
+
+    // HUD
+    ctx.fillStyle="white";
+    ctx.fillText("Fuel: "+fuel.toFixed(0),10,20);
+
+    // victoria
+    if(rocket.y < moonY+40){
+      alert("🚀 ¡HAS LLEGADO A LA LUNA!");
+      location.reload();
+    }
 
     requestAnimationFrame(loop);
   }
